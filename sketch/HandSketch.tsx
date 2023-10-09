@@ -32,16 +32,21 @@ export const HandSketch = ({ handpose }: Props) => {
   let Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Composite = Matter.Composite;
-  const floorWidth = 1000;
+  const floorWidth = 1500;
 
-  const floor: Matter.Body = Bodies.rectangle(
-    window.innerWidth / 2,
-    (window.innerHeight / 3) * 2,
-    floorWidth,
-    10,
-    //@ts-ignore
-    { chamfer: 0, isStatic: true }
-  );
+  const floors: Matter.Body[] = [];
+  for (let i = 0; i < 5; i++) {
+    floors.push(
+      Bodies.rectangle(
+        window.innerWidth / 2 + (floorWidth / 5) * (i - 2),
+        (window.innerHeight / 3) * 2,
+        floorWidth / 5,
+        10,
+        //@ts-ignore
+        { chamfer: 0, isStatic: true }
+      )
+    );
+  }
 
   const points: Point[] = [];
   for (let i = 0; i < 3; i++) {
@@ -73,7 +78,6 @@ export const HandSketch = ({ handpose }: Props) => {
 
   // create an engine
   let engine: Matter.Engine;
-
   const handposeHistory = new HandposeHistory();
   const displayHands = new DisplayHands();
   const r = 150;
@@ -98,7 +102,7 @@ export const HandSketch = ({ handpose }: Props) => {
     p5.strokeWeight(10);
 
     engine = Engine.create();
-    Composite.add(engine.world, [...balls.map((b) => b.body), floor]);
+    Composite.add(engine.world, [...balls.map((b) => b.body), ...floors]);
   };
 
   const draw = (p5: p5Types) => {
@@ -194,9 +198,18 @@ export const HandSketch = ({ handpose }: Props) => {
     p5.rect(0, 0, floorWidth, 10);
     p5.pop();
     const pos = getCurrentPosition(p5);
-    //@ts-ignore
-    Matter.Body.setPosition(floor, pos, true);
-    Matter.Body.setAngle(floor, theta);
+    for (let i = 0; i < floors.length; i++) {
+      Matter.Body.setPosition(
+        floors[i],
+        {
+          x: pos.x + (floorWidth / 5) * (i - 2) * Math.cos(theta),
+          y: pos.y + (floorWidth / 5) * (i - 2) * Math.sin(theta),
+        },
+        //@ts-ignore
+        true
+      );
+      Matter.Body.setAngle(floors[i], theta);
+    }
     p5.pop();
 
     p5.push();
@@ -273,7 +286,7 @@ export const HandSketch = ({ handpose }: Props) => {
     // p5.rect(600, 300, 10, 100);
 
     // 長方形の描画
-    drawMatterBody(floor, p5);
+    // for (const floor of floors) drawMatterBody(floor, p5);
 
     for (const point of points) {
       point.update(balls, score);
