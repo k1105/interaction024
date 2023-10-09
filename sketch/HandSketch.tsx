@@ -191,12 +191,7 @@ export const HandSketch = ({ handpose }: Props) => {
       theta += Math.atan2(leftDist - rightDist, 2 * offset);
     }
 
-    p5.push();
-    p5.rectMode(p5.CENTER);
-    p5.fill(220);
-    p5.noStroke();
-    p5.rect(0, 0, floorWidth, 10);
-    p5.pop();
+    p5.line(-floorWidth / 2, 0, floorWidth / 2, 0);
     const pos = getCurrentPosition(p5);
     for (let i = 0; i < floors.length; i++) {
       Matter.Body.setPosition(
